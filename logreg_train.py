@@ -3,18 +3,19 @@ import numpy as np
 import argparse
 import matplotlib.pyplot as plt
 from src import DataFormat
-from src.DataAnalyse import DataAnalyse
+from src.DataAnalyse import *
+from src import LogisticRegression
 
 #get args
 def     openDataFile():
     args = argparse.ArgumentParser()
-    args.add_argument("data_file", help="data file needed")
+    args.add_argument("data_file", help="data file needed") 
     args.add_argument("--data_analyse", "-a", help="Plot the data analyse with sklearn", action="store_true")
     args.add_argument("--plot", "-p", help="Plot the training progress", action="store_true")
     args.add_argument("--verbose", "-v", help="increase output verbosity", action="store_true")
     return args.parse_args()
 
-if __name__ == "__main__":    
+if __name__ == "__main__":
     args = openDataFile()
 
     #try open csv file
@@ -24,7 +25,7 @@ if __name__ == "__main__":
         print("need data file (csv extension)")
         exit(1)
 
-    #drop useless, isolate output
+    #drop useless and miningless features, isolate output
     format = DataFormat.DataFormat(args)
     df = df.dropna()
     df["Hogwarts House"] = df['Hogwarts House'].replace({"Gryffindor": 0, "Hufflepuff" : 1, "Slytherin" : 2, "Ravenclaw" : 3})
@@ -38,5 +39,7 @@ if __name__ == "__main__":
 
     #normalization
     df_normalize = format.normalization(df)
-
+    y = format.formatY(houses)
     print(df_normalize.head(5))
+    logreg = LogisticRegression.logreg(args)
+    logreg.training(df_normalize, y, 500, 0.01)
